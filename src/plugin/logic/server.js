@@ -49,4 +49,6 @@ const events = {
   __OPEN: open,
 };
 
-export default events;
+module.exports = {
+  default: events,
+};
