@@ -19,7 +19,7 @@ function Plugin({ websockets, ids }) {
   const todos = state?.todos ?? []
 
   const handleUpdate = (i) => (data) => {
-    send("update", { i, ...data })
+    send("change", { i, ...data })
   }
 
   const handleDelete = (i) => () => {

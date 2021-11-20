@@ -12,7 +12,7 @@ const create = (state, { value }) => {
   };
 };
 
-const update = (state, { i, ...data }) => {
+const change = (state, { i, ...data }) => {
   const todos = state?.todos ?? []
   return {
     ...state,
@@ -44,7 +44,7 @@ const open = (state) => {
 
 const events = {
   create,
-  update,
+  change,
   remove,
   __OPEN: open,
 };
