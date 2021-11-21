@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FiCheck, FiPlus, FiTrash } from "react-icons/fi";
 import classNames from "classnames";
 import styled from "styled-components";
 import { DebouncedInput } from "./DebouncedInput";
 import { MdDragIndicator } from "react-icons/md";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { events } from "../logic/server"
 
 const StyledContainer = styled.div`
   background-size: 1.5rem 1.5rem;
@@ -16,15 +17,20 @@ const StyledContainer = styled.div`
 
 function Plugin({ useWebsockets }) {
   const { state, send } = useWebsockets();
+  const [todos, setTodos] = useState([])
 
-  const todos = state?.todos ?? []
+  useEffect(() => {
+    setTodos(state?.todos ?? [])
+  }, [state?.todos])
 
   const handleUpdate = (i) => (data) => {
     send("change", { i, ...data })
+    setTodos(events.change(state, { i, ...data }).todos)
   }
 
   const handleDelete = (i) => () => {
     send("remove", i)
+    setTodos(events.remove(state, i).todos)
   }
 
   const handleSubmit = (e) => {
@@ -34,7 +40,13 @@ function Plugin({ useWebsockets }) {
     value = String(value).trim()
     if (!value) return
 
-    send("create", { value, date: String(new Date().getTime()) })
+    const data = {
+      value,
+      date: String(new Date().getTime()),
+    }
+
+    send("create", data)
+    setTodos(events.create(state, data).todos)
     e.target.todo.value = ''
   }
 
@@ -50,7 +62,12 @@ function Plugin({ useWebsockets }) {
       from: source.index,
       to: destination.index,
     })
+    setTodos(events.reorder(state, {
+      from: source.index,
+      to: destination.index,
+    }).todos)
   }
+
   return (
     <StyledContainer className="w-full h-full bg-gray-100 py-8 overflow-y-auto space-y-0.5 text-gray-500" style={{ fontFamily: 'Poppins' }}>
       <DragDropContext onDragEnd={handleDrop}>

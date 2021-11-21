@@ -63,4 +63,5 @@ const events = {
 
 module.exports = {
   default: events,
+  events,
 };
