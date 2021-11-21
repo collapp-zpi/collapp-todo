@@ -1,4 +1,4 @@
-const create = (state, { value }) => {
+const create = (state, data) => {
   const todos = state?.todos ?? []
   return {
     ...state,
@@ -6,7 +6,7 @@ const create = (state, { value }) => {
       ...todos,
       {
         isDone: false,
-        value,
+        ...data,
       },
     ],
   };
@@ -38,6 +38,17 @@ const remove = (state, i) => {
   };
 };
 
+const reorder = (state, { from, to }) => {
+  const todos = state?.todos ?? []
+  const [item] = todos.splice(from, 1)
+  todos.splice(to, 0, item)
+
+  return {
+    ...state,
+    todos,
+  }
+}
+
 const open = (state) => {
   return state;
 };
@@ -46,6 +57,7 @@ const events = {
   create,
   change,
   remove,
+  reorder,
   __OPEN: open,
 };
 

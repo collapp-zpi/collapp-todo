@@ -3,6 +3,8 @@ import { FiCheck, FiPlus, FiTrash } from "react-icons/fi";
 import classNames from "classnames";
 import styled from "styled-components";
 import { DebouncedInput } from "./DebouncedInput";
+import { MdDragIndicator } from "react-icons/md";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 
 const StyledContainer = styled.div`
   background-size: 1.5rem 1.5rem;
@@ -32,7 +34,7 @@ function Plugin({ useWebsockets }) {
     value = String(value).trim()
     if (!value) return
 
-    send("create", { value })
+    send("create", { value, date: String(new Date().getTime()) })
     e.target.todo.value = ''
   }
 
@@ -40,25 +42,50 @@ function Plugin({ useWebsockets }) {
     handleUpdate(i)({ isDone: !todos[i].isDone })
   }
 
-  return (
-    <StyledContainer className="w-full h-full bg-gray-100 p-8 overflow-y-auto space-y-0.5 text-gray-500" style={{ fontFamily: 'Poppins' }}>
-      {todos.map(({ isDone, value }, i) => (
-        <div className="flex select-none">
-          <div className="flex items-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-5 transition-colors rounded-xl py-3 px-2" onClick={handleClick(i)}>
-            <div className={classNames(`w-5 h-5 rounded-md border-blue-500 border-2 flex-shrink-0 relative overflow-hidden text-blue-500 transition-colors`, isDone && 'bg-blue-500')}>
-              <FiCheck className={classNames("text-white absolute left-1/2 top-1/2 transition-transform -translate-y-1/2 -translate-x-1/2", isDone ? 'scale-100' : 'scale-0')} strokeWidth={4} />
-            </div>
-          </div>
-          <DebouncedInput {...{ value, isDone }} handleUpdate={handleUpdate(i)} />
-          <div className="flex group items-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-5 transition-colors rounded-xl p-2 ml-1" onClick={handleDelete(i)}>
-            <div className="flex items-center justify-center font-bold flex-shrink-0 opacity-20 text-red-500 group-hover:opacity-100 transition-opacity">
-              <FiTrash />
-            </div>
-          </div>
-        </div>
-      ))}
+  const handleDrop = ({ destination, source }) => {
+    if (!source || !destination) return
+    if (source.index === destination.index) return
 
-      <form onSubmit={handleSubmit}>
+    send("reorder", {
+      from: source.index,
+      to: destination.index,
+    })
+  }
+  return (
+    <StyledContainer className="w-full h-full bg-gray-100 py-8 overflow-y-auto space-y-0.5 text-gray-500" style={{ fontFamily: 'Poppins' }}>
+      <DragDropContext onDragEnd={handleDrop}>
+        <Droppable droppableId="todos">
+          {({ droppableProps, innerRef, placeholder }) => (
+            <div className="space-y-0.5" {...droppableProps} ref={innerRef}>
+              {todos.map(({ isDone, value, date }, i) => (
+                <Draggable draggableId={date} index={i} key={date}>
+                  {({ innerRef, draggableProps, dragHandleProps }) => (
+                    <div className="flex select-none pr-8 relative group" {...draggableProps} ref={innerRef}>
+                      <div className="w-8 flex items-center justify-center transition-opacity group-hover:opacity-100 opacity-0" {...dragHandleProps}>
+                        <MdDragIndicator className="ml-2 text-gray-500 text-xl" />
+                      </div>
+                      <div className="flex items-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-5 transition-colors rounded-xl py-3 px-2" onClick={handleClick(i)}>
+                        <div className={classNames(`w-5 h-5 rounded-md border-blue-500 border-2 flex-shrink-0 relative overflow-hidden text-blue-500 transition-colors`, isDone && 'bg-blue-500')}>
+                          <FiCheck className={classNames("text-white absolute left-1/2 top-1/2 transition-transform -translate-y-1/2 -translate-x-1/2", isDone ? 'scale-100' : 'scale-0')} strokeWidth={4} />
+                        </div>
+                      </div>
+                      <DebouncedInput {...{ value, isDone }} handleUpdate={handleUpdate(i)} />
+                      <div className="flex items-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-5 opacity-20 hover:opacity-100 hover:text-red-500 transition-all rounded-xl p-2 ml-1" onClick={handleDelete(i)}>
+                        <div className="flex items-center justify-center font-bold flex-shrink-0">
+                          <FiTrash />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      <form onSubmit={handleSubmit} className="px-8">
         <label className="flex items-center relative">
           <div className="w-5 h-5 my-4 mx-2">
             <FiPlus className="text-xl" strokeWidth={3} />
