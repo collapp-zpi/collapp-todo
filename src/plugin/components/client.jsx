@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { FiCheck, FiPlus, FiTrash } from "react-icons/fi";
 import classNames from "classnames";
 import styled from "styled-components";
-import { useWebsockets } from "../../core/useWebsockets";
 
 const StyledContainer = styled.div`
   background-size: 2rem 2rem;
@@ -12,9 +11,8 @@ const StyledContainer = styled.div`
     linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 `
 
-function Plugin({ websockets, ids }) {
-  const { state, send } =
-    useWebsockets(`${websockets}/?id=${ids?.space}_${ids?.plugin}`);
+function Plugin({ useWebsockets }) {
+  const { state, send } = useWebsockets();
 
   const todos = state?.todos ?? []
 
