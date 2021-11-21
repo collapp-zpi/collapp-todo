@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { DebouncedInput } from "./DebouncedInput";
 import { MdDragIndicator } from "react-icons/md";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { events } from "../logic/server"
+import { actions } from "../logic/server"
 
 const StyledContainer = styled.div`
   background-size: 1.5rem 1.5rem;
@@ -18,6 +18,7 @@ const StyledContainer = styled.div`
 function Plugin({ useWebsockets }) {
   const { state, send } = useWebsockets();
   const [todos, setTodos] = useState([])
+  const todoActions = actions(todos)
 
   useEffect(() => {
     setTodos(state?.todos ?? [])
@@ -25,12 +26,12 @@ function Plugin({ useWebsockets }) {
 
   const handleUpdate = (i) => (data) => {
     send("change", { i, ...data })
-    setTodos(events.change(state, { i, ...data }).todos)
+    setTodos(todoActions.change(i, data))
   }
 
   const handleDelete = (i) => () => {
     send("remove", i)
-    setTodos(events.remove(state, i).todos)
+    setTodos(todoActions.remove(i))
   }
 
   const handleSubmit = (e) => {
@@ -46,7 +47,7 @@ function Plugin({ useWebsockets }) {
     }
 
     send("create", data)
-    setTodos(events.create(state, data).todos)
+    setTodos(todoActions.create(data))
     e.target.todo.value = ''
   }
 
@@ -62,10 +63,7 @@ function Plugin({ useWebsockets }) {
       from: source.index,
       to: destination.index,
     })
-    setTodos(events.reorder(state, {
-      from: source.index,
-      to: destination.index,
-    }).todos)
+    setTodos(todoActions.reorder(source.index, destination.index))
   }
 
   return (
@@ -78,7 +76,7 @@ function Plugin({ useWebsockets }) {
                 <Draggable draggableId={date} index={i} key={date}>
                   {({ innerRef, draggableProps, dragHandleProps }) => (
                     <div className="flex select-none pr-8 relative group" {...draggableProps} ref={innerRef}>
-                      <div className="w-8 flex items-center justify-center transition-opacity group-hover:opacity-100 opacity-0" {...dragHandleProps}>
+                      <div className="w-8 flex items-center justify-center transition-opacity group-hover:opacity-100 opacity-0 cursor-[grab]" {...dragHandleProps}>
                         <MdDragIndicator className="ml-2 text-gray-500 text-xl" />
                       </div>
                       <div className="flex items-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-5 transition-colors rounded-xl py-3 px-2" onClick={handleClick(i)}>

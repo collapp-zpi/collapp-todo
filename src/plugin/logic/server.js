@@ -1,53 +1,42 @@
-const create = (state, data) => {
-  const todos = state?.todos ?? []
-  return {
-    ...state,
-    todos: [
-      ...todos,
-      {
-        isDone: false,
-        ...data,
-      },
-    ],
-  };
-};
-
-const change = (state, { i, ...data }) => {
-  const todos = state?.todos ?? []
-  return {
-    ...state,
-    todos: [
-      ...todos.slice(0, i),
-      {
-        ...todos[i],
-        ...data,
-      },
-      ...todos.slice(i + 1),
-    ],
-  };
-};
-
-const remove = (state, i) => {
-  const todos = state?.todos ?? []
-  return {
-    ...state,
-    todos: [
-      ...todos.slice(0, i),
-      ...todos.slice(i + 1),
-    ],
-  };
-};
-
-const reorder = (state, { from, to }) => {
-  const todos = state?.todos ?? []
-  const [item] = todos.splice(from, 1)
-  todos.splice(to, 0, item)
-
-  return {
-    ...state,
-    todos,
+const actions = (todos = []) => ({
+  create: (data) => [
+    ...todos,
+    {
+      isDone: false,
+      ...data,
+    }
+  ],
+  change: (i, data) => [
+    ...todos.slice(0, i),
+    {
+      ...todos[i],
+      ...data,
+    },
+    ...todos.slice(i + 1),
+  ],
+  remove: (i) => [
+    ...todos.slice(0, i),
+    ...todos.slice(i + 1),
+  ],
+  reorder: (from, to) => {
+    const newTodos = [...todos]
+    const [item] = newTodos.splice(from, 1)
+    newTodos.splice(to, 0, item)
+    return newTodos
   }
-}
+})
+
+const create = (state, data) =>
+  actions(state?.todos).create(data);
+
+const change = (state, { i, ...data }) =>
+  actions(state?.todos).change(i, data);
+
+const remove = (state, i) =>
+  actions(state?.todos).remove(i);
+
+const reorder = (state, { from, to }) =>
+  actions(state?.todos).reorder(from, to);
 
 const open = (state) => {
   return state;
@@ -63,5 +52,5 @@ const events = {
 
 module.exports = {
   default: events,
-  events,
+  actions,
 };

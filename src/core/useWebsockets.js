@@ -10,7 +10,8 @@ export function useWebsockets(url) {
   const [errors, setErrors] = useState([]);
   const [module, setModule] = useState({});
 
-  const send = (fun, data) => {
+  const send = async (fun, data) => {
+    await new Promise((res) => setTimeout(() => res(), 500))
     if (functions.includes(fun)) {
       const newState = module[fun](state, data);
       setState(newState);
