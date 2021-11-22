@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FiCheck, FiPlus, FiTrash } from "react-icons/fi";
+import { CgSpinner } from "react-icons/cg";
 import classNames from "classnames";
 import styled from "styled-components";
 import { DebouncedInput } from "./DebouncedInput";
@@ -16,14 +17,22 @@ const StyledContainer = styled.div`
 `
 
 function Plugin({ useWebsockets }) {
-  const { state, send } = useWebsockets();
+  const { state, send, loading } = useWebsockets();
   const [todos, setTodos] = useState([])
-  const todoActions = actions(todos)
 
   useEffect(() => {
+    console.log(state)
     setTodos(state?.todos ?? [])
   }, [state?.todos])
 
+  if (loading)
+    return (
+      <StyledContainer className="w-full h-full bg-gray-100 flex text-gray-500 p-8 select-none">
+        <CgSpinner className="animate-spin text-3xl m-auto" />
+      </StyledContainer>
+    )
+
+  const todoActions = actions(todos)
   const handleUpdate = (i) => (data) => {
     send("change", { i, ...data })
     setTodos(todoActions.change(i, data))
@@ -67,7 +76,7 @@ function Plugin({ useWebsockets }) {
   }
 
   return (
-    <StyledContainer className="w-full h-full bg-gray-100 py-8 overflow-y-auto space-y-0.5 text-gray-500" style={{ fontFamily: 'Poppins' }}>
+    <StyledContainer className="w-full h-full bg-gray-100 py-8 overflow-y-auto space-y-0.5 text-gray-500">
       <DragDropContext onDragEnd={handleDrop}>
         <Droppable droppableId="todos">
           {({ droppableProps, innerRef, placeholder }) => (

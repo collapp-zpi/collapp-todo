@@ -14,7 +14,7 @@ function App() {
   const [height, setHeight] = useState(config.height || 2);
 
   return (
-    <div className="bg-warmGray-100 min-h-screen">
+    <div className="bg-warmGray-100 min-h-screen" style={{ fontFamily: 'Poppins' }}>
       <div className="w-full mx-auto flex flex-col justify-center justify-items-center py-8 max-w-5xl border-b-2 border-[#E9E9E9]">
         <div className="max-w-2xl w-full space-y-6 mx-auto">
           <div className="space-y-2">

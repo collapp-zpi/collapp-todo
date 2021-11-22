@@ -26,17 +26,25 @@ const actions = (todos = []) => ({
   }
 })
 
-const create = (state, data) =>
-  actions(state?.todos).create(data);
+const create = (state, data) => ({
+  ...state,
+  todos: actions(state?.todos).create(data),
+});
 
-const change = (state, { i, ...data }) =>
-  actions(state?.todos).change(i, data);
+const change = (state, { i, ...data }) => ({
+  ...state,
+  todos: actions(state?.todos).change(i, data),
+});
 
-const remove = (state, i) =>
-  actions(state?.todos).remove(i);
+const remove = (state, i) => ({
+  ...state,
+  todos: actions(state?.todos).remove(i),
+});
 
-const reorder = (state, { from, to }) =>
-  actions(state?.todos).reorder(from, to);
+const reorder = (state, { from, to }) => ({
+  ...state,
+  todos: actions(state?.todos).reorder(from, to),
+});
 
 const open = (state) => {
   return state;
